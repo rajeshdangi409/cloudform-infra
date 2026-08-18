@@ -196,3 +196,7 @@ Related repositories:
 - [`cloudform-bootstrap`](https://github.com/rajeshdangi409/cloudform-bootstrap) — remote state backend
 - [`cloudform-app`](https://github.com/rajeshdangi409/cloudform-app) — Flask application + CI pipeline
 - [`cloudform-gitops`](https://github.com/rajeshdangi409/cloudform-gitops) — FluxCD GitOps manifests
+
+## 📄 License
+
+This project is licensed under the Apache License 2.0.
