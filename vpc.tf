@@ -2,24 +2,15 @@ module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "~> 6.0"
 
-  name = "flask-eks-rds-vpc"
+  name = var.vpc_name
 
-  cidr = "10.0.0.0/16"
+  cidr = var.vpc_cidr
 
-  azs = [
-    "ap-south-1a",
-    "ap-south-1b"
-  ]
+  azs = var.availability_zones
 
-  public_subnets = [
-    "10.0.1.0/24",
-    "10.0.2.0/24"
-  ]
+  public_subnets = var.public_subnet_cidrs
 
-  private_subnets = [
-    "10.0.11.0/24",
-    "10.0.12.0/24"
-  ]
+  private_subnets = var.private_subnet_cidrs
 
   enable_nat_gateway = true
   single_nat_gateway = true
@@ -28,8 +19,8 @@ module "vpc" {
   enable_dns_support   = true
 
   tags = {
-    Project     = "flask-eks-rds"
-    Environment = "dev"
+    Project     = var.project_name
+    Environment = var.environment
     ManagedBy   = "Terraform"
   }
 }

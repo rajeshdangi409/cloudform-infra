@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      TF_VAR_db_password: ${{ secrets.TF_VAR_db_password }}
+      TF_VAR_db_password: ${{ secrets.TF_VAR_DB_PASSWORD }}
 
     steps:
       - name: Checkout Repo
@@ -19,13 +19,17 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-region: ${{ vars.AWS_REGION }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Init
-        run: terraform init
+        run: terraform init \
+          -backend-config="bucket=${{ vars.TF_STATE_BUCKET }}" \
+          -backend-config="key=${{ vars.TF_STATE_KEY }}" \
+          -backend-config="region=${{ vars.AWS_REGION }}" \
+          -backend-config="dynamodb_table=${{ vars.TF_LOCK_TABLE }}"
 
       - name: Terraform Validate
         run: terraform validate
@@ -35,3 +39,37 @@ jobs:
 
       - name: Terraform Apply
         run: terraform apply -auto-approve -lock-timeout=5m
+
+      - name: Update EKS Kubeconfig
+        run: |
+          aws eks update-kubeconfig \
+            --region ${{ vars.AWS_REGION }} \
+            --name ${{ vars.EKS_CLUSTER_NAME }}
+
+      - name: Verify EKS Cluster
+        run: |
+          kubectl get nodes
+
+      - name: Install Flux CLI
+        run: |
+          curl -s https://fluxcd.io/install.sh | sudo bash
+
+      - name: Check Flux Prerequisites
+        run: |
+          flux check --pre
+
+      - name: Bootstrap Flux
+        env:
+          GITHUB_TOKEN: ${{ secrets.FLUX_GITHUB_TOKEN }}
+        run: |
+          flux bootstrap github \
+            --owner=${{ vars.FLUX_GITHUB_OWNER }} \
+            --repository=${{ vars.FLUX_GITOPS_REPO }} \
+            --branch=main \
+            --path=clusters/production \
+            --personal
+
+      - name: Verify Flux
+        run: |
+          flux check
+          kubectl get pods -n flux-system

@@ -1,12 +1,12 @@
 resource "aws_security_group" "rds" {
-  name        = "flask-eks-rds-sg"
+  name        = var.rds_security_group_name
   description = "Security group for Flask RDS"
   vpc_id      = module.vpc.vpc_id
 
   tags = {
-    Name        = "flask-eks-rds-sg"
-    Project     = "flask-eks-rds"
-    Environment = "dev"
+    Name        = var.rds_security_group_name
+    Project     = var.project_name
+    Environment = var.environment
     ManagedBy   = "Terraform"
   }
 }
@@ -24,11 +24,11 @@ module "rds" {
   source  = "terraform-aws-modules/rds/aws"
   version = "~> 6.0"
 
-  identifier = "flask-eks-rds-db"
+  identifier = var.rds_identifier
 
   engine         = "mysql"
-  engine_version = "8.4.9"
-  instance_class = "db.t4g.micro"
+  engine_version = var.rds_engine_version
+  instance_class = var.rds_instance_class
 
   allocated_storage     = 20
   max_allocated_storage = 1000
@@ -36,7 +36,7 @@ module "rds" {
 
   storage_encrypted = true
 
-  db_name  = "flaskapp"
+  db_name  = var.rds_database_name
   username = "admin"
   password = var.db_password
 
@@ -65,8 +65,8 @@ module "rds" {
   skip_final_snapshot = true
 
   tags = {
-    Project     = "flask-eks-rds"
-    Environment = "dev"
+    Project     = var.project_name
+    Environment = var.environment
     ManagedBy   = "Terraform"
   }
 }
