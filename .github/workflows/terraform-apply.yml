@@ -25,7 +25,10 @@ jobs:
         uses: hashicorp/setup-terraform@v3
 
       - name: Create tfvars file
-        run: echo "${{ secrets.TF_VARS_FILE }}" > terraform.tfvars
+        env:
+          TF_VARS_CONTENT: ${{ secrets.TF_VARS_FILE }}
+        run: |
+          printf '%s\n' "$TF_VARS_CONTENT" > terraform.tfvars
 
       - name: Terraform Init
         run: terraform init \
