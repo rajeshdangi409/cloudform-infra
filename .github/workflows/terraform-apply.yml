@@ -74,6 +74,7 @@ jobs:
             --repository=${{ vars.FLUX_GITOPS_REPO }} \
             --branch=main \
             --path=clusters/production \
+            --token-auth \
             --personal
 
       - name: Verify Flux
