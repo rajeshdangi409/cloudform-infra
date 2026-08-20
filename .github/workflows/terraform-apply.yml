@@ -24,6 +24,9 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
+      - name: Create tfvars file
+        run: echo "${{ secrets.TF_VARS_FILE }}" > terraform.tfvars
+
       - name: Terraform Init
         run: terraform init \
           -backend-config="bucket=${{ vars.TF_STATE_BUCKET }}" \
@@ -35,10 +38,10 @@ jobs:
         run: terraform validate
 
       - name: Terraform Plan
-        run: terraform plan -lock-timeout=5m -no-color
+        run: terraform plan -var-file="terraform.tfvars" -lock-timeout=5m -no-color
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve -lock-timeout=5m
+        run: terraform apply -var-file="terraform.tfvars" -auto-approve -lock-timeout=5m
 
       - name: Update EKS Kubeconfig
         run: |

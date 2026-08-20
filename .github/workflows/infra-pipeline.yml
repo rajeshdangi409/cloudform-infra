@@ -26,6 +26,9 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
+      - name: Create tfvars file
+        run: echo "${{ secrets.TF_VARS_FILE }}" > terraform.tfvars
+
       - name: Terraform Format Check
         run: terraform fmt -check
 
@@ -41,4 +44,4 @@ jobs:
         run: terraform validate
 
       - name: Terraform Plan
-        run: terraform plan -no-color
+        run: terraform plan -var-file="terraform.tfvars" -no-color
